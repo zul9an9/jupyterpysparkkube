@@ -5,18 +5,18 @@ Resumo do ocorrido:
 zul9an9/pyspark-notebook:v4 e v5 (são bem identicas só mudei o usuário no diretório app para jovyan:users)
 
 a v4 utilizei para fazer a subida da vm no docker-compose
-     https://github.com/zul9an9/jupyterPysparkDocker (Este funciona)
+     https://github.com/zul9an9/JupyterPysparkDockerCompose (Este funciona)
 
 a v5 utilizei para fazer o deployment do kubernetes (utilizei esta imagem no docker e construi o container e funcionou 
      aparecendo oos diretórios)
-     https://github.com/zul9an9/jupyterpysparkkubenetes (veja neste diretório o erro em ErrorPyspark.PNG)
+     https://github.com/zul9an9/jupyterpysparkkube(veja neste diretório o erro em ErrorPyspark.PNG)
 
 - No repositório do github
 
-código do docker-compose: https://github.com/zul9an9/jupyterPysparkDocker (Este funciona)
+código do docker-compose: https://github.com/zul9an9/JupyterPysparkDockerCompose (Este funciona)
     - aparece no linux o diretório /app e seus subdiretórios e arquivos de execução
 
-código do kubernetes:     https://github.com/zul9an9/jupyterpysparkkubenetes
+código do kubernetes:     https://github.com/zul9an9/jupyterpysparkkube
     - (veja neste diretório o erro em ErrorPyspark.PNG) e não aparece os arquivos para execução da imagem v5
     - Aparentemente é um erro de permissão.
 
