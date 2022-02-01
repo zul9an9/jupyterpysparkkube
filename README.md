@@ -1,4 +1,5 @@
-Resumo do ocorrido:
+Resumo do ocorrido: No "docker compose" a imagem traz ok (local e digitalocean) e
+                    no kubernetes da Digital Ocean não aparece os arquivos de execução e informa falta de permissão
 
 - Coloquei a duas imagens no docker hub:
 
