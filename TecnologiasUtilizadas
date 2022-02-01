@@ -1,0 +1,20 @@
+Tecnologias utilizadas.
+
+Código no github : https://github.com/zul9an9/pyspark-notebook
+Seguir arquivo scriptExecucao.txt para entendimento do processo - token de segurança para acesso da aplicação.
+
+Pyspark, python, docker, docker-compose, Jupyter-Notebook e Spark SQL.
+Docker usando network e volume que deve ser ter rotinas de backup.
+Para escalar o pyspark com altos volumes de dados altere as configurações 
+como: "spark.sql.shuffle.partitions","spark.driver.memory" e outros.
+ 
+Pode-se ainda colocar o container em uma nuvem e/ou colocar um volume para persistencia de dados em nuvem ou local. Ver docker-compose-vol.yaml  
+
+Possibilidades: 
+
+    1o. Separar os script e colocá-los em máquinas diferentes.
+    2o. O script Pagamentos e PagamentosVendas podem virar scripts python e serem automatizados através do Cron e CronJob.
+    3o. Os novos arquivos de pagamentos podem ser colocados na pasta app através do volume da máquina que pode ser apontada 
+       para a própria máquina ou nuvem.
+        
+

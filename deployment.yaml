@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pyspark-notebook
+spec:
+  selector:
+    matchLabels:
+      app: pyspark-notebook
+  template:
+    metadata:
+      labels:
+        app: pyspark-notebook
+    spec:
+      containers:
+      - name: pyspark-notebook
+        image: zul9an9/pyspark-notebook:v5
+        ports:
+         - containerPort: 8888
+        volumeMounts:
+          - mountPath: /app
+            name: pv-cosmer
+      volumes:
+        - name: pv-cosmer
+          persistentVolumeClaim:
+            claimName: pvc-cosmer

@@ -1,0 +1,47 @@
+Para executar sem precisar construir:
+
+1o. passo: executar com docker-compose o diretorio deste arquivo.
+
+    $ docker-compose up -d
+
+2o. passo: obter o token de uso do servidor
+
+     $   docker container exec pyspark-notebook jupyter server list
+
+    Currently running servers:
+    http://0.0.0.0:8888/?token=250d5725afab1d55f978217bbdd489c83656e6bebf9e9bf6 :: /app
+
+    verificar o token para a execução no browser: 250d5725afab1d55f978217bbdd489c83656e6bebf9e9bf6
+
+outros comandos para conhecimento:
+     $ docker container exec pyspark-notebook jupyter notebook --NotebookApp.iopub_data_rate_limit=2000000 # comandos de alteração de limite
+     $ docker container exec pyspark-notebook NotebookApp.rate_limit_window=4.0 # comandos de alteração de limite
+     $ docker container exec -it pyspark-notebook /bin/bash  # entrar na máquina linux pyspark/notebook
+
+
+
+3o. passo: entrar no browser e executar a url:
+
+    localhost:8888
+
+3o. passo: colocar o token para execução na página do browser:
+
+    250d5725afab1d55f978217bbdd489c83656e6bebf9e9bf6
+
+
+4o. passo: abrir o arquivo "Pagamentos.ipynb" para execução.
+
+    obs: depois de ter o código aberto executar todo o processo em Kernel ==> Restart & Run All
+         Esperar o tempo de processamento e ir para outros "scripts"
+         Executar "PagamentosVendas.ipynb" que poderia estar em outro container atendedendo várias áreas.
+
+         Pode-se executar cada uma das células para verificar a construção do script e executar passo a passo
+
+5o. passo: Encerrar o aplicativo no diretório do docker-compose
+
+    $ docker-compose down
+
+obs: temos o arquivo de construção da imagem e execução do container no arquivo "scriptConstrucaoContainer.txt"
+
+
+

@@ -1,0 +1,53 @@
+Executar os passos a seguir para criar o pyspark em container docker
+
+1o. passo - Instalar o docker desktop na sua máquina seja ela windown mac ou linux
+
+2o. passo - Construir a imagem com os dados no pyspark (não neessário se for usar minha imagem)
+            Usar o diretório onde se encontra o arquio Dockerfile para executar este comando
+            zul9an9 é o meu usuário do Docker Hub - crie seu usuário (abrir cota) e coloque o seu usuário no comando abaixo
+
+$ docker build -t zul9an9/pyspark-notebook:v5 .
+
+3o. passo - Rodar o container com a imagem acima fazendo port-forward na porta 8888 da sua máquina local 
+            Isto faz a sua máquina local acessar o container com os browser pela porta 8888
+            Substitua seu usuário pelo meu ou execute direto com o meu usuário pq está imagem já esta pronta descartando o passo 2
+
+$ docker container run -d -p 8888:8888 --name pyspark-notebook zul9an9/pyspark-notebook:v5
+
+4o. passo - Entrar no container criado (Não necessário - passo se vc criou a sua imagem)
+$ docker container exec -it pyspark-notebook /bin/bash
+
+5o. passo - Dentro do container verificar o token do container - motivo segurança
+            (Não necessário - passo se vc criou a sua imagem)
+$ jupyter server list
+Currently running servers:
+http://0.0.0.0:8888/?token=250d5725afab1d55f978217bbdd489c83656e6bebf9e9bf6 :: /app
+Veja o token da máquina
+250d5725afab1d55f978217bbdd489c83656e6bebf9e9bf6
+
+6o. passo - Entrar no browser http://0.0.0.0:8888 e colocar o token da máquina 
+            No acesso ao browser colocar este token se estive usando a minha imagem
+250d5725afab1d55f978217bbdd489c83656e6bebf9e9bf6
+
+7o. passo - Entrar no container criado (somente se quiser entrar na máquina por curiosidade)
+$ docker container exec -it pyspark-notebook /bin/bash
+
+8o. passo - Enviar a sua imagem para o Docker Hub
+            Coloque o seu usuário do Docker Hub em vez do meu (zul9an9)
+$ docker push zul9an9/pyspark-notebook:v5
+
+9o. passo - Se quiser pode trazer minha imagem do Docker Hub para a sua máquina
+
+$ docker pull zul9an9/pyspark-notebook:v5
+
+10o. passo - Se quiser colocar mais arquivos de transações para carregar é só recontruir a imagem
+
+$  docker build -t zul9an9/pyspark-notebook:v5 . 
+
+             e executar o container novamente
+
+$  docker container run -d -p 8888:8888 --name pyspark-notebook zul9an9/pyspark-notebook:v5
+
+
+obs: temos o arquivo de execução do aplicativo  "scriptExecucao.txt"
+

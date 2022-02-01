@@ -1,0 +1,180 @@
+São 4 arquivos yaml (pv, pvc, deployment e service) e o dockerfile (construção de imagem do pyspark com os scripts dentro e com as permissões para execução e leitura do usuário)
+
+  a imagem zul9an9/pyspark-notebook:v3 e colocar no docker hub
+    Veja que o usuário que faz a execução é o "jovyan"
+	Ele já vem parametrizado da imagem jupyter/pyspark-notebook:latest
+	Este usuário não tem password e aparentemente nem o root tem.
+	Eu peguei esta imagem e criei meus diretorios no /app para fazer o exercicio de pyspark
+             parquet/clientes
+			 parquet/planos
+			 parquet/pagamentos
+			 parquet/pagamentosGerais
+			 
+ 	Leio duas planilhas de excel (pagamentos.csv e planos.csv) e uma uri de clientes e tranformo em Temp Views do pysparq em parquet
+    
+    obs: aqui surgiu a dúvida 1 - como consigo fazer atualização pq não era o usuário root ?
+                                - pergunta ? tenho que fazer em dois estágios
+                                             um para atualizar como root e depois uma imagem para tratar o "jovyan"	?							
+
+# arquivo Dockerfile
+
+# imagem base de cópia do Docker Hub
+# USER root
+FROM jupyter/pyspark-notebook:latest
+# Colocar no diretório /app
+# USER jovyan
+WORKDIR /app
+
+#USER root
+#RUN apt-get update 
+#RUN apt-get install -y curl
+# Copiar os arquivos com exceção do .dockerignore
+COPY . .
+
+RUN conda install nbconvert 
+
+#RUN apt-get update && apt-get install pandoc
+
+#RUN jupyter notebook ipython nbconvert --to python  *.ipynb
+
+RUN cd /app && mkdir parquet && chmod 744 -R parquet/ && chown -R jovyan parquet/
+
+RUN cd /app && mkdir parquet/clientes && chmod 744 -R parquet/clientes/ && chown -R jovyan parquet/clientes/
+
+RUN cd /app && mkdir parquet/planos && chmod 744 -R parquet/planos/ && chown -R jovyan parquet/planos/
+
+RUN cd /app && mkdir parquet/pagamentos && chmod 744 -R parquet/pagamentos/ && chown -R jovyan parquet/pagamentos/
+
+RUN cd /app && mkdir parquet/pagamentosGerais && chmod 744 -R parquet/pagamentosGerais/ && chown -R jovyan parquet/pagamentosGerais/
+
+RUN cd /app && mkdir csv && chmod 744 -R csv/ && chown -R jovyan csv/
+
+RUN cd /app && mkdir csv/processados && chmod 744 -R csv/processados/ && chown -R jovyan csv/processados/
+
+#CMD /bin/bash
+
+# Expor a porta 8888
+EXPOSE 8888
+ 
+2o. Construir o pv, pvc , deployment e serviço (arquivos abaixo). 
+$   Coloquei tb no final o mm processo com docker-compose e funciona normal na minha imagem zul9an9/pyspark-notebook:v3
+#   Criei um kubernetes na digital ocean e entrou normalmente tudo ...
+#   Só que na hora de eu executar o script não havia nada lá dentro ...
+#   Parece que ele puxou a imagem do pyspark do jupyter e não do zul9an9  	
+#   só existia o diretório /app vazio ... 
+#   outra vez fiz um dropless e criei um kubernetes e não consegui gerar a imagem com o zul9an9/pyspark-notebook
+#         somente consegui fazer com o jupyter/pyspark-notebook:latest
+#         vi que na digitalocean tem um serviço container registry e imagem mais não entendi direito
+#         obs: aqui surgiu a dúvida 2 - pq minha imagem não subiu e a do pyspark sim ? 
+#                                       a sua imagem do kubedevio sobe tb normalmente! já testei em outros exercicios.
+#                                       Preciso do arquivo "Pagamentos.ipynb" para executar no browser e a pasta /app está vazia
+
+kubectl apply -f pv-pyspark.yaml
+kubectl apply -f pvc-pyspark.yaml
+kubectl apply -f deployment-pyspark.yaml   
+# criar o serviço ...               			
+kubectl apply -f service-pyspark.yaml
+# este comando pega o token da máquina para entrar na tela inicial do pyspark e autenticar
+kubectl exec pod/pyspark-notebook-7dc957c665-kr7fn jupyter notebook list 
+
+--- # arquivo pv-cosmer.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-cosmer
+  labels:
+    type: local
+spec:
+  storageClassName: standard
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Recycle
+  hostPath:
+    path: /app
+--- # arquivo pvc-cosmer.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-cosmer
+spec:
+  selector:
+    matchLabels:
+      type: local
+  accessModes:
+    - ReadWriteMany
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: pv-cosmer
+--- # arquivo deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pyspark-notebook
+spec:
+  selector:
+    matchLabels:
+      app: pyspark-notebook
+  template:
+    metadata:
+      labels:
+        app: pyspark-notebook
+    spec:
+      containers:
+      - name: pyspark-notebook
+        image: zul9an9/pyspark-notebook:v3
+        ports:
+         - containerPort: 8888
+        volumeMounts:
+          - mountPath: /app
+            name: pv-cosmer
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 1000m
+          limits:
+            memory: 256Mi
+            cpu: 1000m
+      volumes:
+        - name: pv-cosmer
+          persistentVolumeClaim:
+            claimName: pvc-cosmer
+--- # arquivo service-pyspark.yaml  #  serviço do pyspark
+kind: Service
+metadata:
+  name: srv-pyspark-notebook
+spec:
+  selector:
+    app: pyspark-notebook
+  ports:
+  - protocol: TCP
+    port: 8888
+    targetPort: 8888
+  type: LoadBalancer			
+
+===== docker compose
+# no docker-compose funciona com o script abaixo
+version: '3.8'
+#Volumes fixos
+volumes:
+  meta_vol:
+
+networks:
+  meta_net:
+    driver: bridge
+
+#Services de banco mongo e postgre
+services:
+  srv-pyspark-notebook:
+    image: zul9an9/pyspark-notebook:v3
+    container_name: pyspark-notebook
+    ports:
+    - 8888:8888
+    networks:
+    - meta_net
+    volumes:
+    - meta_vol:/app
